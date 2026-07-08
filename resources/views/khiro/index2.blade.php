@@ -3,21 +3,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>index page</title>
+    <title>Document</title>
 </head>
 <body>
-   <p>
-    {{ $greting }}
-   </p>
-
-   <ul>
-    <li>
-        <a href="">
-            {{ $ninjas[0]['name'] }}
-        </a>
-    </li>
-   </ul>
-
-
+    <a href="">
+        
+    </a>
 </body>
 </html>

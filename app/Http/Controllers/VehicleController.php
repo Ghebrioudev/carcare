@@ -2,64 +2,67 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Vehicle\StoreVehicleRequest;
+use App\Http\Requests\Vehicle\UpdateVehicleRequest;
+use App\Http\Resources\VehicleResource;
 use App\Models\Vehicle;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request): AnonymousResourceCollection
     {
-        //
+        $vehicles = $request->user()
+            ->vehicles()
+            ->withCount('maintenances')
+            ->latest()
+            ->get();
+
+        return VehicleResource::collection($vehicles);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreVehicleRequest $request): JsonResponse
     {
-        //
+        $vehicle = $request->user()->vehicles()->create($request->validated());
+
+        return response()->json([
+            'data' => new VehicleResource($vehicle),
+        ], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show(Request $request, Vehicle $vehicle): VehicleResource
     {
-        //
+        $this->authorizeVehicle($request, $vehicle);
+
+        $vehicle->loadCount('maintenances');
+
+        return new VehicleResource($vehicle);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Vehicle $vehicle)
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
     {
-        //
+        $this->authorizeVehicle($request, $vehicle);
+
+        $vehicle->update($request->validated());
+
+        return new VehicleResource($vehicle->fresh());
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Vehicle $vehicle)
+    public function destroy(Request $request, Vehicle $vehicle): JsonResponse
     {
-        //
+        $this->authorizeVehicle($request, $vehicle);
+
+        $vehicle->delete();
+
+        return response()->json([
+            'message' => 'Vehicle deleted successfully.',
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Vehicle $vehicle)
+    private function authorizeVehicle(Request $request, Vehicle $vehicle): void
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Vehicle $vehicle)
-    {
-        //
+        abort_unless($vehicle->user_id === $request->user()->id, 403);
     }
 }
