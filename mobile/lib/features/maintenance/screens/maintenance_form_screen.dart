@@ -33,6 +33,7 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
   final _notesController = TextEditingController();
   final _mileageController = TextEditingController();
   final _totalCostController = TextEditingController();
+  final _scrollController = ScrollController();
 
   DateTime _performedAt = DateTime.now();
   List<MaintenanceType> _types = [];
@@ -55,6 +56,7 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
     _notesController.dispose();
     _mileageController.dispose();
     _totalCostController.dispose();
+    _scrollController.dispose();
     for (final item in _items) {
       item.dispose();
     }
@@ -172,6 +174,7 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
           : Form(
               key: _formKey,
               child: ListView(
+                controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(
@@ -258,6 +261,13 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
                             : () {
                                 setState(() {
                                   _items.add(_ItemFormState(typeId: _types.first.id));
+                                });
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
                                 });
                               },
                         icon: const Icon(Icons.add),

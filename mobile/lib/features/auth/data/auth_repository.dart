@@ -75,6 +75,26 @@ class AuthRepository {
     }
   }
 
+  Future<User> updateProfile({
+    String? name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
+  }) async {
+    final Map<String, dynamic> data = {};
+    if (name != null) data['name'] = name;
+    if (email != null) data['email'] = email;
+    if (password != null) {
+      data['password'] = password;
+      data['password_confirmation'] = passwordConfirmation;
+    }
+
+    final response = await _apiClient.put('/profile', data: data);
+    final userJson =
+        response['data'] as Map<String, dynamic>? ?? response;
+    return User.fromJson(userJson);
+  }
+
   Future<User> _persistAuthResponse(Map<String, dynamic> data) async {
     final token = data['token'];
     final userJson = data['user'];

@@ -41,6 +41,11 @@ class MainShell extends StatelessWidget {
             selectedIcon: Icon(Icons.notifications),
             label: 'Reminders',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );

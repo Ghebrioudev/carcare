@@ -181,6 +181,13 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: () =>
+              context.push('/vehicles/${widget.vehicleId}/maintenances'),
+          icon: const Icon(Icons.build_outlined),
+          label: const Text('View maintenance history'),
+        ),
+        const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: _deleteVehicle,
           style: OutlinedButton.styleFrom(

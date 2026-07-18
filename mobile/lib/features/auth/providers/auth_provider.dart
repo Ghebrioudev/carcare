@@ -91,6 +91,33 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile({
+    String? name,
+    String? email,
+    String? password,
+    String? passwordConfirmation,
+  }) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      user = await _authRepository.updateProfile(
+        name: name,
+        email: email,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      );
+      return true;
+    } on ApiException catch (error) {
+      errorMessage = error.message;
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     errorMessage = null;
     notifyListeners();

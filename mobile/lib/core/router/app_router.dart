@@ -8,6 +8,7 @@ import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/maintenance/screens/maintenance_detail_screen.dart';
 import '../../features/maintenance/screens/maintenance_form_screen.dart';
 import '../../features/maintenance/screens/maintenance_list_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
 import '../../features/reminders/screens/reminders_screen.dart';
 import '../../features/vehicles/screens/vehicle_detail_screen.dart';
 import '../../features/vehicles/screens/vehicle_form_screen.dart';
@@ -78,6 +79,14 @@ GoRouter createAppRouter(AuthProvider authProvider) {
               GoRoute(
                 path: '/reminders',
                 builder: (context, state) => const RemindersScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),
