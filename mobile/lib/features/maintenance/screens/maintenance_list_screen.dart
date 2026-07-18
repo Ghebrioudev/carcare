@@ -6,7 +6,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_states.dart';
-import '../../../core/widgets/main_shell.dart';
 import '../providers/maintenance_provider.dart';
 
 class MaintenanceListScreen extends StatefulWidget {

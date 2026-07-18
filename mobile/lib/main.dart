@@ -12,6 +12,7 @@ import 'features/dashboard/providers/dashboard_provider.dart';
 import 'features/maintenance/data/maintenance_repository.dart';
 import 'features/maintenance/data/maintenance_type_repository.dart';
 import 'features/maintenance/providers/maintenance_provider.dart';
+import 'features/reminders/data/reminder_repository.dart';
 import 'features/reminders/providers/reminders_provider.dart';
 import 'features/vehicles/data/vehicle_repository.dart';
 import 'features/vehicles/providers/vehicle_provider.dart';
@@ -28,6 +29,7 @@ void main() {
   final vehicleRepository = VehicleRepository(apiClient);
   final maintenanceRepository = MaintenanceRepository(apiClient);
   final maintenanceTypeRepository = MaintenanceTypeRepository(apiClient);
+  final reminderRepository = ReminderRepository(apiClient);
   final dashboardRepository = DashboardRepository(apiClient);
 
   final authProvider = AuthProvider(authRepository);
@@ -42,6 +44,7 @@ void main() {
         Provider<VehicleRepository>.value(value: vehicleRepository),
         Provider<MaintenanceRepository>.value(value: maintenanceRepository),
         Provider<MaintenanceTypeRepository>.value(value: maintenanceTypeRepository),
+        Provider<ReminderRepository>.value(value: reminderRepository),
         Provider<DashboardRepository>.value(value: dashboardRepository),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider(
@@ -55,8 +58,7 @@ void main() {
         ),
         ChangeNotifierProvider(
           create: (_) => RemindersProvider(
-            vehicleRepository: vehicleRepository,
-            maintenanceRepository: maintenanceRepository,
+            reminderRepository: reminderRepository,
           ),
         ),
       ],

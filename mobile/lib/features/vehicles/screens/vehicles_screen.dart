@@ -84,7 +84,7 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                         onTap: () => context.push('/vehicles/${vehicle.id}'),
                         child: Row(
                           children: [
-                            IconBadge(
+                            const IconBadge(
                               icon: Icons.directions_car,
                               color: AppTheme.primary,
                             ),

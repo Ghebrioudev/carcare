@@ -8,7 +8,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_states.dart';
 import '../data/maintenance_repository.dart';
 import '../data/maintenance_type_repository.dart';
-import '../models/maintenance.dart';
 import '../models/maintenance_type.dart';
 import '../providers/maintenance_provider.dart';
 
@@ -66,12 +65,14 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
     setState(() => _isFetching = true);
 
     try {
-      _types = await context.read<MaintenanceTypeRepository>().fetchAll();
+      final typeRepo = context.read<MaintenanceTypeRepository>();
+      final maintenanceRepo = context.read<MaintenanceRepository>();
+
+      _types = await typeRepo.fetchAll();
 
       if (widget.isEditing) {
-        final maintenance = await context
-            .read<MaintenanceRepository>()
-            .fetchById(widget.maintenanceId!);
+        final maintenance =
+            await maintenanceRepo.fetchById(widget.maintenanceId!);
         _vehicleId = maintenance.vehicleId;
         _performedAt = maintenance.performedAt;
         _mileageController.text = '${maintenance.mileage}';
@@ -315,13 +316,12 @@ class _MaintenanceFormScreenState extends State<MaintenanceFormScreen> {
 
 class _ItemFormState {
   _ItemFormState({
-    int? typeId,
+    this.typeId,
     this.nextDueDate,
     String? nextDueMileage,
     String? notes,
     String? cost,
-  })  : typeId = typeId,
-        nextDueMileageController =
+  })  : nextDueMileageController =
             TextEditingController(text: nextDueMileage ?? ''),
         notesController = TextEditingController(text: notes ?? ''),
         costController = TextEditingController(text: cost ?? '');
@@ -397,7 +397,7 @@ class _OperationCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<int>(
-              value: item.typeId,
+              initialValue: item.typeId,
               decoration: const InputDecoration(labelText: 'Type'),
               items: types
                   .map(

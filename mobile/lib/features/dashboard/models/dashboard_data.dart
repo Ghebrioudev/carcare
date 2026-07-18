@@ -1,5 +1,4 @@
 import '../../maintenance/models/maintenance.dart';
-import '../../vehicles/models/vehicle.dart';
 
 class DashboardData {
   const DashboardData({

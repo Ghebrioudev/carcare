@@ -212,7 +212,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                     ),
                     const SizedBox(height: 14),
                     DropdownButtonFormField<String>(
-                      value: _fuelType,
+                      initialValue: _fuelType,
                       decoration: const InputDecoration(
                         labelText: 'Fuel type',
                         prefixIcon: Icon(Icons.local_gas_station_outlined),

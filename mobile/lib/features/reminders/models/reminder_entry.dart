@@ -21,6 +21,22 @@ class ReminderEntry {
   final DateTime? nextDueDate;
   final int? nextDueMileage;
 
+  factory ReminderEntry.fromJson(Map<String, dynamic> json) {
+    return ReminderEntry(
+      itemId: json['item_id'] as int,
+      maintenanceId: json['maintenance_id'] as int,
+      vehicleId: json['vehicle_id'] as int,
+      vehicleName: json['vehicle_name'] as String,
+      licensePlate: json['license_plate'] as String,
+      currentMileage: json['current_mileage'] as int,
+      maintenanceTypeName: json['maintenance_type_name'] as String,
+      nextDueDate: json['next_due_date'] != null
+          ? DateTime.tryParse(json['next_due_date'] as String)
+          : null,
+      nextDueMileage: json['next_due_mileage'] as int?,
+    );
+  }
+
   bool get hasDateReminder => nextDueDate != null;
   bool get hasMileageReminder => nextDueMileage != null;
 

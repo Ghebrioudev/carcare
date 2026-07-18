@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MaintenanceTypeController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy']);
 
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/reminders', [ReminderController::class, 'index']);
 });
