@@ -27,7 +27,7 @@ class StoreVehicleRequest extends FormRequest
             ],
             'current_mileage' => ['required', 'integer', 'min:0'],
             'fuel_type' => ['required', Rule::enum(FuelType::class)],
-            'photo_path' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:4096'], // Max 4MB
         ];
     }
 }

@@ -13,7 +13,6 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 15),
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json',
         },
       ),
     );
@@ -41,7 +40,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> post(
     String path, {
-    Map<String, dynamic>? data,
+    dynamic data,
   }) async {
     final response = await _request(() => _dio.post<dynamic>(path, data: data));
     return _responseMap(response);
@@ -49,7 +48,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> put(
     String path, {
-    Map<String, dynamic>? data,
+    dynamic data,
   }) async {
     final response = await _request(() => _dio.put<dynamic>(path, data: data));
     return _responseMap(response);

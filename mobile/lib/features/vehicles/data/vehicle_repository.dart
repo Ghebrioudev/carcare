@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../models/vehicle.dart';
 
@@ -22,15 +24,50 @@ class VehicleRepository {
     return Vehicle.fromJson(vehicleJson);
   }
 
-  Future<Vehicle> create(Map<String, dynamic> payload) async {
-    final data = await _apiClient.post('/vehicles', data: payload);
+  Future<Vehicle> create(
+    Map<String, dynamic> payload, {
+    File? photo,
+  }) async {
+    FormData? formData;
+    if (photo != null) {
+      formData = FormData.fromMap({
+        ...payload,
+        'photo': await MultipartFile.fromFile(photo.path),
+      });
+    }
+    final data = await _apiClient.post(
+      '/vehicles',
+      data: formData ?? payload,
+    );
     final vehicleJson = data['data'] as Map<String, dynamic>;
 
     return Vehicle.fromJson(vehicleJson);
   }
 
-  Future<Vehicle> update(int id, Map<String, dynamic> payload) async {
-    final data = await _apiClient.put('/vehicles/$id', data: payload);
+  Future<Vehicle> update(
+    int id,
+    Map<String, dynamic> payload, {
+    File? photo,
+    bool? removePhoto,
+  }) async {
+    FormData? formData;
+    if (photo != null || removePhoto != null) {
+      formData = FormData.fromMap({
+        ...payload,
+        '_method': 'PUT',
+        if (photo != null) 'photo': await MultipartFile.fromFile(photo.path),
+        if (removePhoto != null) 'remove_photo': removePhoto,
+      });
+    }
+    final data = formData != null
+        ? await _apiClient.post(
+            '/vehicles/$id',
+            data: formData,
+          )
+        : await _apiClient.put(
+            '/vehicles/$id',
+            data: payload,
+          );
     final vehicleJson = data['data'] as Map<String, dynamic>? ?? data;
 
     return Vehicle.fromJson(vehicleJson);

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/network/api_exception.dart';
@@ -28,9 +29,12 @@ class VehicleProvider extends ChangeNotifier {
     }
   }
 
-  Future<Vehicle?> createVehicle(Map<String, dynamic> payload) async {
+  Future<Vehicle?> createVehicle(
+    Map<String, dynamic> payload, {
+    File? photo,
+  }) async {
     try {
-      final vehicle = await _vehicleRepository.create(payload);
+      final vehicle = await _vehicleRepository.create(payload, photo: photo);
       vehicles = [vehicle, ...vehicles];
       notifyListeners();
       return vehicle;
@@ -41,9 +45,19 @@ class VehicleProvider extends ChangeNotifier {
     }
   }
 
-  Future<Vehicle?> updateVehicle(int id, Map<String, dynamic> payload) async {
+  Future<Vehicle?> updateVehicle(
+    int id,
+    Map<String, dynamic> payload, {
+    File? photo,
+    bool? removePhoto,
+  }) async {
     try {
-      final vehicle = await _vehicleRepository.update(id, payload);
+      final vehicle = await _vehicleRepository.update(
+        id,
+        payload,
+        photo: photo,
+        removePhoto: removePhoto,
+      );
       vehicles = vehicles
           .map((item) => item.id == id ? vehicle : item)
           .toList(growable: false);

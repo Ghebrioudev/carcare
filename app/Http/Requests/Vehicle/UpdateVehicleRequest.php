@@ -32,7 +32,8 @@ class UpdateVehicleRequest extends FormRequest
             ],
             'current_mileage' => ['sometimes', 'required', 'integer', 'min:0'],
             'fuel_type' => ['sometimes', 'required', Rule::enum(FuelType::class)],
-            'photo_path' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:4096'], // Max 4MB
+            'remove_photo' => ['nullable', 'boolean'],
         ];
     }
 }

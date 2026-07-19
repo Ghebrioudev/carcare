@@ -7,7 +7,7 @@ class Vehicle {
     required this.licensePlate,
     required this.currentMileage,
     required this.fuelType,
-    this.photoPath,
+    this.photoUrl,
     this.maintenancesCount,
     this.createdAt,
     this.updatedAt,
@@ -20,7 +20,7 @@ class Vehicle {
   final String licensePlate;
   final int currentMileage;
   final String fuelType;
-  final String? photoPath;
+  final String? photoUrl;
   final int? maintenancesCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -36,7 +36,7 @@ class Vehicle {
       licensePlate: json['license_plate'] as String,
       currentMileage: json['current_mileage'] as int,
       fuelType: json['fuel_type'] as String,
-      photoPath: json['photo_path'] as String?,
+      photoUrl: json['photo_url'] as String?,
       maintenancesCount: json['maintenances_count'] as int?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
@@ -55,7 +55,6 @@ class Vehicle {
       'license_plate': licensePlate,
       'current_mileage': currentMileage,
       'fuel_type': fuelType,
-      if (photoPath != null) 'photo_path': photoPath,
     };
   }
 
@@ -66,7 +65,7 @@ class Vehicle {
     String? licensePlate,
     int? currentMileage,
     String? fuelType,
-    String? photoPath,
+    String? photoUrl,
   }) {
     return Vehicle(
       id: id,
@@ -76,7 +75,7 @@ class Vehicle {
       licensePlate: licensePlate ?? this.licensePlate,
       currentMileage: currentMileage ?? this.currentMileage,
       fuelType: fuelType ?? this.fuelType,
-      photoPath: photoPath ?? this.photoPath,
+      photoUrl: photoUrl ?? this.photoUrl,
       maintenancesCount: maintenancesCount,
       createdAt: createdAt,
       updatedAt: updatedAt,

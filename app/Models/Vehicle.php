@@ -6,6 +6,7 @@ use App\Enums\FuelType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Vehicle extends Model
 {
@@ -27,6 +28,11 @@ class Vehicle extends Model
             'current_mileage' => 'integer',
             'fuel_type' => FuelType::class,
         ];
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->photo_path ? url(Storage::url($this->photo_path)) : null;
     }
 
     public function user(): BelongsTo

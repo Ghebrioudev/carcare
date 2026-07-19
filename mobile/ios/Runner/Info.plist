@@ -53,6 +53,12 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Need camera access to take photos of your vehicle</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Need photo library access to select photos of your vehicle</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Need photo library access to save photos of your vehicle</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

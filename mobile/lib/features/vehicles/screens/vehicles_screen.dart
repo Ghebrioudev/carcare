@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -84,9 +85,36 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                         onTap: () => context.push('/vehicles/${vehicle.id}'),
                         child: Row(
                           children: [
-                            const IconBadge(
-                              icon: Icons.directions_car,
-                              color: AppTheme.primary,
+                            Hero(
+                              tag: 'vehicle-photo-${vehicle.id}',
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: 64,
+                                  height: 64,
+                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  child: vehicle.photoUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: vehicle.photoUrl!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              const Icon(
+                                            Icons.directions_car_outlined,
+                                            size: 32,
+                                            color: AppTheme.textSecondary,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.directions_car_outlined,
+                                          size: 32,
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(

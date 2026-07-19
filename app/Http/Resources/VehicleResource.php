@@ -17,7 +17,7 @@ class VehicleResource extends JsonResource
             'license_plate' => $this->license_plate,
             'current_mileage' => $this->current_mileage,
             'fuel_type' => $this->fuel_type->value,
-            'photo_path' => $this->photo_path,
+            'photo_url' => $this->photo_url,
             'maintenances_count' => $this->whenCounted('maintenances'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

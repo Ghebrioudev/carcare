@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
 
 class VehicleController extends Controller
 {
@@ -25,7 +26,13 @@ class VehicleController extends Controller
 
     public function store(StoreVehicleRequest $request): JsonResponse
     {
-        $vehicle = $request->user()->vehicles()->create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('photo')) {
+            $data['photo_path'] = $request->file('photo')->store('vehicles', 'public');
+        }
+
+        $vehicle = $request->user()->vehicles()->create($data);
 
         return response()->json([
             'data' => new VehicleResource($vehicle),
@@ -45,7 +52,24 @@ class VehicleController extends Controller
     {
         $this->authorizeVehicle($request, $vehicle);
 
-        $vehicle->update($request->validated());
+        $data = $request->validated();
+
+        // Handle photo replacement
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($vehicle->photo_path) {
+                Storage::disk('public')->delete($vehicle->photo_path);
+            }
+            $data['photo_path'] = $request->file('photo')->store('vehicles', 'public');
+        } elseif ($request->has('remove_photo') && $request->remove_photo) {
+            // Remove photo if requested
+            if ($vehicle->photo_path) {
+                Storage::disk('public')->delete($vehicle->photo_path);
+            }
+            $data['photo_path'] = null;
+        }
+
+        $vehicle->update($data);
 
         return new VehicleResource($vehicle->fresh());
     }
@@ -53,6 +77,11 @@ class VehicleController extends Controller
     public function destroy(Request $request, Vehicle $vehicle): JsonResponse
     {
         $this->authorizeVehicle($request, $vehicle);
+
+        // Delete photo if exists
+        if ($vehicle->photo_path) {
+            Storage::disk('public')->delete($vehicle->photo_path);
+        }
 
         $vehicle->delete();
 

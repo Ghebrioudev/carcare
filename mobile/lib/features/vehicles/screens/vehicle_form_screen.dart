@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -33,6 +36,11 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   bool _isLoading = false;
   bool _isFetching = false;
   String? _errorMessage;
+  File? _selectedImage;
+  String? _existingImageUrl;
+  bool _removeImage = false;
+
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -66,6 +74,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
       _plateController.text = vehicle.licensePlate;
       _mileageController.text = '${vehicle.currentMileage}';
       _fuelType = vehicle.fuelType;
+      _existingImageUrl = vehicle.photoUrl;
     } on ApiException catch (error) {
       _errorMessage = error.message;
     } finally {
@@ -73,6 +82,36 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
         setState(() => _isFetching = false);
       }
     }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1200,
+        maxHeight: 1200,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+          _removeImage = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick image: $e')),
+        );
+      }
+    }
+  }
+
+  void _clearImage() {
+    setState(() {
+      _selectedImage = null;
+      _removeImage = true;
+    });
   }
 
   Map<String, dynamic> _buildPayload() {
@@ -101,12 +140,20 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
       final payload = _buildPayload();
 
       if (widget.isEditing) {
-        await provider.updateVehicle(widget.vehicleId!, payload);
+        await provider.updateVehicle(
+          widget.vehicleId!,
+          payload,
+          photo: _selectedImage,
+          removePhoto: _removeImage,
+        );
         if (mounted) {
           context.pop();
         }
       } else {
-        final vehicle = await provider.createVehicle(payload);
+        final vehicle = await provider.createVehicle(
+          payload,
+          photo: _selectedImage,
+        );
         if (mounted) {
           context.go('/vehicles/${vehicle!.id}');
         }
@@ -135,6 +182,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    _buildImagePicker(),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _brandController,
                       textCapitalization: TextCapitalization.words,
@@ -256,6 +305,110 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    bool hasImage = _selectedImage != null ||
+        (_existingImageUrl != null && !_removeImage);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Vehicle photo',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 200,
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppTheme.border,
+              width: 1,
+            ),
+          ),
+          child: hasImage
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (_selectedImage != null)
+                        Image.file(_selectedImage!, fit: BoxFit.cover)
+                      else if (_existingImageUrl != null)
+                        CachedNetworkImage(
+                          imageUrl: _existingImageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black54,
+                          ),
+                          onPressed: _clearImage,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.add_photo_alternate_outlined,
+                      size: 56,
+                      color: AppTheme.textSecondary,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Add a photo of your vehicle',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
+                    ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library_outlined),
+                label: const Text('From gallery'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _pickImage(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt_outlined),
+                label: const Text('Take photo'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
