@@ -15,13 +15,45 @@ class VehicleController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $vehicles = $request->user()
+        $query = $request->user()
             ->vehicles()
-            ->withCount('maintenances')
-            ->latest()
-            ->get();
+            ->withCount('maintenances');
 
-        return VehicleResource::collection($vehicles);
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('brand', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('license_plate', 'like', "%{$search}%");
+            });
+        }
+
+        $sort = $request->query('sort', 'latest');
+        switch ($sort) {
+            case 'brand_asc':
+                $query->orderBy('brand', 'asc');
+                break;
+            case 'brand_desc':
+                $query->orderBy('brand', 'desc');
+                break;
+            case 'year_asc':
+                $query->orderBy('year', 'asc');
+                break;
+            case 'year_desc':
+                $query->orderBy('year', 'desc');
+                break;
+            case 'mileage_asc':
+                $query->orderBy('current_mileage', 'asc');
+                break;
+            case 'mileage_desc':
+                $query->orderBy('current_mileage', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        return VehicleResource::collection($query->get());
     }
 
     public function store(StoreVehicleRequest $request): JsonResponse

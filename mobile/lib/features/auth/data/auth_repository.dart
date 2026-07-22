@@ -75,6 +75,14 @@ class AuthRepository {
     }
   }
 
+  Future<void> deleteAccount() async {
+    try {
+      await _apiClient.delete('/profile');
+    } finally {
+      await _tokenStorage.deleteToken();
+    }
+  }
+
   Future<User> updateProfile({
     String? name,
     String? email,

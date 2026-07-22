@@ -6,8 +6,27 @@ class MaintenanceRepository {
 
   final ApiClient _apiClient;
 
-  Future<List<Maintenance>> fetchByVehicle(int vehicleId) async {
-    final data = await _apiClient.get('/vehicles/$vehicleId/maintenances');
+  Future<List<Maintenance>> fetchByVehicle(
+    int vehicleId, {
+    String? search,
+    String? type,
+    String? sort,
+  }) async {
+    final List<String> querySegments = [];
+    if (search != null && search.isNotEmpty) {
+      querySegments.add('search=${Uri.encodeComponent(search)}');
+    }
+    if (type != null && type.isNotEmpty) {
+      querySegments.add('type=$type');
+    }
+    if (sort != null && sort.isNotEmpty) {
+      querySegments.add('sort=$sort');
+    }
+    final String queryString =
+        querySegments.isNotEmpty ? '?${querySegments.join('&')}' : '';
+
+    final data =
+        await _apiClient.get('/vehicles/$vehicleId/maintenances$queryString');
     final items = data['data'] as List<dynamic>;
 
     return items

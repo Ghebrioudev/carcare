@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_states.dart';
 import '../../../core/widgets/main_shell.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../providers/vehicle_provider.dart';
 
 class VehiclesScreen extends StatefulWidget {
@@ -19,12 +21,103 @@ class VehiclesScreen extends StatefulWidget {
 }
 
 class _VehiclesScreenState extends State<VehiclesScreen> {
+  Timer? _debounce;
+  String _searchQuery = '';
+  String _selectedSort = 'latest';
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VehicleProvider>().loadVehicles();
+      context.read<VehicleProvider>().loadVehicles(
+        search: _searchQuery,
+        sort: _selectedSort,
+      );
     });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _debouncedSearch() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        context.read<VehicleProvider>().loadVehicles(
+          search: _searchQuery,
+          sort: _selectedSort,
+        );
+      }
+    });
+  }
+
+  void _showSortSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Sort Vehicles',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              _buildSortOption('latest', 'Latest Added'),
+              _buildSortOption('brand_asc', 'Brand (A - Z)'),
+              _buildSortOption('brand_desc', 'Brand (Z - A)'),
+              _buildSortOption('year_desc', 'Newest Years First'),
+              _buildSortOption('year_asc', 'Oldest Years First'),
+              _buildSortOption('mileage_desc', 'Highest Mileage'),
+              _buildSortOption('mileage_asc', 'Lowest Mileage'),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(String code, String label) {
+    final isSelected = _selectedSort == code;
+    return ListTile(
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected ? const Icon(Icons.check, color: AppTheme.primary) : null,
+      onTap: () {
+        Navigator.pop(context);
+        setState(() {
+          _selectedSort = code;
+        });
+        context.read<VehicleProvider>().loadVehicles(
+              search: _searchQuery,
+              sort: _selectedSort,
+            );
+      },
+    );
   }
 
   @override
@@ -34,7 +127,10 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: provider.loadVehicles,
+          onRefresh: () => provider.loadVehicles(
+            search: _searchQuery,
+            sort: _selectedSort,
+          ),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -44,10 +140,40 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   subtitle: 'Manage your cars and maintenance history.',
                 ),
               ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: const InputDecoration(
+                            hintText: 'Search brand, model...',
+                            prefixIcon: Icon(Icons.search),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 12,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            _searchQuery = value;
+                            _debouncedSearch();
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        onPressed: _showSortSheet,
+                        icon: const Icon(Icons.sort),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
               if (provider.isLoading && provider.vehicles.isEmpty)
                 const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: AppLoadingOverlay(message: 'Loading vehicles...'),
+                  child: VehiclesSkeleton(),
                 )
               else if (provider.errorMessage != null &&
                   provider.vehicles.isEmpty)

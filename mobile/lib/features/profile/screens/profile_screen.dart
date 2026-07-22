@@ -86,6 +86,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) context.go('/login');
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final textController = TextEditingController();
+    final confirmKey = GlobalKey<FormState>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Account?'),
+          content: Form(
+            key: confirmKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'This action is irreversible. All vehicles, log history, and reminders will be deleted.\n\nPlease type "DELETE" to confirm:',
+                  style: TextStyle(height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: textController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'DELETE',
+                    errorStyle: TextStyle(color: AppTheme.danger),
+                  ),
+                  validator: (value) {
+                    if (value != 'DELETE') {
+                      return 'Matches verification text';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.danger,
+              ),
+              onPressed: () {
+                if (confirmKey.currentState!.validate()) {
+                  Navigator.pop(context, true);
+                }
+              },
+              child: const Text('Delete Permanently'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() => _isLoading = true);
+      try {
+        final success = await context.read<AuthProvider>().deleteAccount();
+        if (success && mounted) {
+          context.go('/login');
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to delete account.')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
@@ -299,6 +374,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           label: const Text('Logout'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.danger,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Danger Zone',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.danger,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        AppCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Once you delete your account, there is no going back. All your vehicles, logs, and files will be permanently erased.',
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _isLoading ? null : _confirmDeleteAccount,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.danger,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text('Delete account'),
+                              ),
+                            ],
                           ),
                         ),
                       ],

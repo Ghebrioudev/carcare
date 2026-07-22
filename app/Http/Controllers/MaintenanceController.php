@@ -18,12 +18,50 @@ class MaintenanceController extends Controller
     {
         $this->authorizeVehicle($request, $vehicle);
 
-        $maintenances = $vehicle->maintenances()
-            ->with(['items.maintenanceType'])
-            ->latest('performed_at')
-            ->get();
+        $query = $vehicle->maintenances()->with(['items.maintenanceType']);
 
-        return MaintenanceResource::collection($maintenances);
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('notes', 'like', "%{$search}%")
+                  ->orWhere('garage_name', 'like', "%{$search}%")
+                  ->orWhereHas('items', function ($itemQuery) use ($search) {
+                      $itemQuery->whereHas('maintenanceType', function ($typeQuery) use ($search) {
+                          $typeQuery->where('name', 'like', "%{$search}%");
+                      });
+                  });
+            });
+        }
+
+        if ($type = $request->query('type')) {
+            $query->whereHas('items', function ($itemQuery) use ($type) {
+                $itemQuery->where('maintenance_type_id', $type);
+            });
+        }
+
+        $sort = $request->query('sort', 'date_desc');
+        switch ($sort) {
+            case 'date_asc':
+                $query->orderBy('performed_at', 'asc');
+                break;
+            case 'cost_asc':
+                $query->orderBy('total_cost', 'asc');
+                break;
+            case 'cost_desc':
+                $query->orderBy('total_cost', 'desc');
+                break;
+            case 'mileage_asc':
+                $query->orderBy('mileage', 'asc');
+                break;
+            case 'mileage_desc':
+                $query->orderBy('mileage', 'desc');
+                break;
+            case 'date_desc':
+            default:
+                $query->orderBy('performed_at', 'desc');
+                break;
+        }
+
+        return MaintenanceResource::collection($query->get());
     }
 
     public function store(StoreMaintenanceRequest $request, Vehicle $vehicle): JsonResponse

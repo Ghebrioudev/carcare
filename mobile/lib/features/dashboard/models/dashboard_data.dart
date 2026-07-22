@@ -6,15 +6,21 @@ class DashboardData {
     required this.totalCost,
     this.nextReminder,
     this.recentMaintenances = const [],
+    this.monthlyCosts = const [],
+    this.categoryCosts = const [],
   });
 
   final int vehiclesCount;
   final double totalCost;
   final NextReminder? nextReminder;
   final List<Maintenance> recentMaintenances;
+  final List<MonthlyCost> monthlyCosts;
+  final List<CategoryCost> categoryCosts;
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
     final rawRecent = json['recent_maintenances'];
+    final rawMonthly = json['monthly_costs'];
+    final rawCategory = json['category_costs'];
     return DashboardData(
       vehiclesCount: json['vehicles_count'] as int? ?? 0,
       totalCost: double.tryParse('${json['total_cost']}') ?? 0,
@@ -27,6 +33,44 @@ class DashboardData {
                   Maintenance.fromJson(item as Map<String, dynamic>))
               .toList()
           : const [],
+      monthlyCosts: rawMonthly is List
+          ? rawMonthly
+              .map((item) => MonthlyCost.fromJson(item as Map<String, dynamic>))
+              .toList()
+          : const [],
+      categoryCosts: rawCategory is List
+          ? rawCategory
+              .map((item) => CategoryCost.fromJson(item as Map<String, dynamic>))
+              .toList()
+          : const [],
+    );
+  }
+}
+
+class MonthlyCost {
+  const MonthlyCost({required this.month, required this.cost});
+
+  final String month;
+  final double cost;
+
+  factory MonthlyCost.fromJson(Map<String, dynamic> json) {
+    return MonthlyCost(
+      month: json['month'] as String? ?? '',
+      cost: double.tryParse('${json['cost']}') ?? 0.0,
+    );
+  }
+}
+
+class CategoryCost {
+  const CategoryCost({required this.category, required this.cost});
+
+  final String category;
+  final double cost;
+
+  factory CategoryCost.fromJson(Map<String, dynamic> json) {
+    return CategoryCost(
+      category: json['category'] as String? ?? '',
+      cost: double.tryParse('${json['cost']}') ?? 0.0,
     );
   }
 }

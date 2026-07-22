@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_states.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../maintenance/models/maintenance.dart';
 import '../models/dashboard_data.dart';
@@ -71,8 +73,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               if (dashboard.isLoading && dashboard.data == null)
                 const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: AppLoadingOverlay(message: 'Loading dashboard...'),
+                  child: DashboardSkeleton(),
                 )
               else if (dashboard.errorMessage != null &&
                   dashboard.data == null)
@@ -104,8 +105,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: _NextReminderBanner(reminder: data.nextReminder!),
           ),
         ),
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         sliver: SliverGrid.count(
           crossAxisCount: 2,
           mainAxisSpacing: 12,
@@ -141,6 +140,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
+      ),
+      SliverToBoxAdapter(
+        child: _DashboardCharts(data: data),
       ),
       const SliverToBoxAdapter(
         child: Padding(
@@ -389,6 +391,264 @@ class _MaintenanceItemTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DashboardCharts extends StatefulWidget {
+  const _DashboardCharts({required this.data});
+
+  final DashboardData data;
+
+  @override
+  State<_DashboardCharts> createState() => _DashboardChartsState();
+}
+
+class _DashboardChartsState extends State<_DashboardCharts> {
+  int _activeTab = 0; // 0 = Cost History, 1 = Categories
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: AppCard(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Analytics',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Row(
+                    children: [
+                      _buildTabButton(0, 'History'),
+                      const SizedBox(width: 8),
+                      _buildTabButton(1, 'Categories'),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 200,
+                child: _activeTab == 0 ? _buildBarChart() : _buildPieChart(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String label) {
+    final isActive = _activeTab == index;
+    return GestureDetector(
+      onTap: () => setState(() => _activeTab = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? AppTheme.primary : AppTheme.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? AppTheme.primary : Colors.grey[300]!,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? Colors.white : AppTheme.textSecondary,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBarChart() {
+    final monthlyCosts = widget.data.monthlyCosts;
+    if (monthlyCosts.isEmpty) {
+      return const Center(child: Text('No history data available'));
+    }
+
+    final maxCost = monthlyCosts
+        .map((e) => e.cost)
+        .fold<double>(0.0, (prev, element) => prev > element ? prev : element);
+    final yLimit = maxCost == 0 ? 100.0 : maxCost * 1.25;
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: yLimit,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipColor: (_) => AppTheme.primary,
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                AppFormatters.currency(rod.toY),
+                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              );
+            },
+          ),
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (double value, TitleMeta meta) {
+                final index = value.toInt();
+                if (index >= 0 && index < monthlyCosts.length) {
+                  return SideTitleWidget(
+                    axisSide: meta.axisSide,
+                    child: Text(
+                      monthlyCosts[index].month,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+              reservedSize: 22,
+            ),
+          ),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+        ),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(
+          monthlyCosts.length,
+          (index) => BarChartGroupData(
+            x: index,
+            barRods: [
+              BarChartRodData(
+                toY: monthlyCosts[index].cost,
+                color: AppTheme.primary,
+                width: 16,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                backDrawRodData: BackgroundBarChartRodData(
+                  show: true,
+                  toY: yLimit,
+                  color: Colors.grey[100]!,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    final categoryCosts = widget.data.categoryCosts;
+    if (categoryCosts.isEmpty) {
+      return const Center(child: Text('No category data available'));
+    }
+
+    final total = categoryCosts
+        .map((e) => e.cost)
+        .fold<double>(0.0, (val, element) => val + element);
+
+    final colors = [
+      AppTheme.primary,
+      AppTheme.success,
+      AppTheme.warning,
+      AppTheme.secondary,
+      Colors.cyan,
+      Colors.teal,
+      Colors.orange,
+    ];
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 4,
+          child: PieChart(
+            PieChartData(
+              sectionsSpace: 2,
+              centerSpaceRadius: 30,
+              sections: List.generate(
+                categoryCosts.length,
+                (index) {
+                  final costItem = categoryCosts[index];
+                  final percentage = total == 0 ? 0.0 : (costItem.cost / total) * 100;
+                  return PieChartSectionData(
+                    color: colors[index % colors.length],
+                    value: costItem.cost,
+                    title: percentage > 10 ? '${percentage.toStringAsFixed(0)}%' : '',
+                    radius: 35,
+                    titleStyle: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 6,
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: categoryCosts.length,
+            itemBuilder: (context, index) {
+              final costItem = categoryCosts[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: colors[index % colors.length],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        costItem.category,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppFormatters.currency(costItem.cost),
+                      style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

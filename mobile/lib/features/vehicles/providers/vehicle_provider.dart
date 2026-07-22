@@ -14,13 +14,13 @@ class VehicleProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> loadVehicles() async {
+  Future<void> loadVehicles({String? search, String? sort}) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      vehicles = await _vehicleRepository.fetchAll();
+      vehicles = await _vehicleRepository.fetchAll(search: search, sort: sort);
     } on ApiException catch (error) {
       errorMessage = error.message;
     } finally {

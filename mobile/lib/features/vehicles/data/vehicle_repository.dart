@@ -8,8 +8,18 @@ class VehicleRepository {
 
   final ApiClient _apiClient;
 
-  Future<List<Vehicle>> fetchAll() async {
-    final data = await _apiClient.get('/vehicles');
+  Future<List<Vehicle>> fetchAll({String? search, String? sort}) async {
+    final List<String> querySegments = [];
+    if (search != null && search.isNotEmpty) {
+      querySegments.add('search=${Uri.encodeComponent(search)}');
+    }
+    if (sort != null && sort.isNotEmpty) {
+      querySegments.add('sort=$sort');
+    }
+    final String queryString =
+        querySegments.isNotEmpty ? '?${querySegments.join('&')}' : '';
+
+    final data = await _apiClient.get('/vehicles$queryString');
     final items = data['data'] as List<dynamic>;
 
     return items

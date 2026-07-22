@@ -13,13 +13,23 @@ class MaintenanceProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> loadByVehicle(int vehicleId) async {
+  Future<void> loadByVehicle(
+    int vehicleId, {
+    String? search,
+    String? type,
+    String? sort,
+  }) async {
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      maintenances = await _repository.fetchByVehicle(vehicleId);
+      maintenances = await _repository.fetchByVehicle(
+        vehicleId,
+        search: search,
+        type: type,
+        sort: sort,
+      );
     } on ApiException catch (error) {
       errorMessage = error.message;
     } finally {
