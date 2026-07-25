@@ -1,66 +1,12 @@
 $kind: http-request
 name: mantenance
-url: http://127.0.0.1:8000/api/vehicles/6/maintenances
+url: http://127.0.0.1:8000/api/chat
 method: POST
 body:
   type: json
   content: "{\r
 
-    \  \"performed_at\": \"2026-07-10\",\r
-
-    \  \"mileage\": 78250,\r
-
-    \  \"garage_name\": \"Auto Service Center\",\r
-
-    \  \"notes\": \"Major maintenance before summer trip.\",\r
-
-    \  \"total_cost\": 14500,\r
-
-    \  \"items\": [\r
-
-    \    {\r
-
-    \      \"maintenance_type_id\": 1,\r
-
-    \      \"cost\": 3500,\r
-
-    \      \"notes\": \"Engine oil and oil filter replaced.\",\r
-
-    \      \"next_due_date\": \"2026-10-10\",\r
-
-    \      \"next_due_mileage\": 88250\r
-
-    \    },\r
-
-    \    {\r
-
-    \      \"maintenance_type_id\": 5,\r
-
-    \      \"cost\": 8000,\r
-
-    \      \"notes\": \"Replaced two front tires.\",\r
-
-    \      \"next_due_date\": null,\r
-
-    \      \"next_due_mileage\": 128250\r
-
-    \    },\r
-
-    \    {\r
-
-    \      \"maintenance_type_id\": 6,\r
-
-    \      \"cost\": 3000,\r
-
-    \      \"notes\": \"Front brake pads replaced.\",\r
-
-    \      \"next_due_date\": \"2027-01-10\",\r
-
-    \      \"next_due_mileage\": 98250\r
-
-    \    }\r
-
-    \  ]\r
+    \  \"message\": \"When should I change my engine oil?\"\r
 
     }"
 auth:

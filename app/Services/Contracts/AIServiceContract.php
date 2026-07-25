@@ -11,4 +11,7 @@ interface AIServiceContract
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return string The assistant's text response.
      *
-     * @
+     * @throws \RuntimeException If the AI provider fails or returns an invalid response.
+     */
+    public function chat(string $systemPrompt, array $messages): string;
+}

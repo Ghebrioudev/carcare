@@ -4,6 +4,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
+import '../../features/chat/screens/chat_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/maintenance/screens/maintenance_detail_screen.dart';
 import '../../features/maintenance/screens/maintenance_form_screen.dart';
@@ -71,6 +72,14 @@ GoRouter createAppRouter(AuthProvider authProvider) {
               GoRoute(
                 path: '/vehicles',
                 builder: (context, state) => const VehiclesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/chat',
+                builder: (context, state) => const ChatScreen(),
               ),
             ],
           ),

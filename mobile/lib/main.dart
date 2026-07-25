@@ -7,6 +7,8 @@ import 'core/router/app_router.dart';
 import 'core/storage/token_storage.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/providers/auth_provider.dart';
+import 'features/chat/data/chat_repository.dart';
+import 'features/chat/providers/chat_provider.dart';
 import 'features/dashboard/data/dashboard_repository.dart';
 import 'features/dashboard/providers/dashboard_provider.dart';
 import 'features/maintenance/data/maintenance_repository.dart';
@@ -31,6 +33,7 @@ void main() {
   final maintenanceTypeRepository = MaintenanceTypeRepository(apiClient);
   final reminderRepository = ReminderRepository(apiClient);
   final dashboardRepository = DashboardRepository(apiClient);
+  final chatRepository = ChatRepository(apiClient);
 
   final authProvider = AuthProvider(authRepository);
   final router = createAppRouter(authProvider);
@@ -46,6 +49,7 @@ void main() {
         Provider<MaintenanceTypeRepository>.value(value: maintenanceTypeRepository),
         Provider<ReminderRepository>.value(value: reminderRepository),
         Provider<DashboardRepository>.value(value: dashboardRepository),
+        Provider<ChatRepository>.value(value: chatRepository),
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
         ChangeNotifierProvider(
           create: (_) => VehicleProvider(vehicleRepository),
@@ -60,6 +64,9 @@ void main() {
           create: (_) => RemindersProvider(
             reminderRepository: reminderRepository,
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(chatRepository),
         ),
       ],
       child: CarCareApp(router: router),
