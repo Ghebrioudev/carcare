@@ -38,6 +38,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   String? _errorMessage;
   File? _selectedImage;
   String? _existingImageUrl;
+  DateTime? _existingUpdatedAt;
   bool _removeImage = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -75,6 +76,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
       _mileageController.text = '${vehicle.currentMileage}';
       _fuelType = vehicle.fuelType;
       _existingImageUrl = vehicle.photoUrl;
+      _existingUpdatedAt = vehicle.updatedAt;
     } on ApiException catch (error) {
       _errorMessage = error.message;
     } finally {
@@ -343,6 +345,8 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                       else if (_existingImageUrl != null)
                         CachedNetworkImage(
                           imageUrl: _existingImageUrl!,
+                          cacheKey:
+                              '$_existingImageUrl-${_existingUpdatedAt?.millisecondsSinceEpoch ?? ''}',
                           fit: BoxFit.cover,
                           placeholder: (context, url) => const Center(
                             child: CircularProgressIndicator(),

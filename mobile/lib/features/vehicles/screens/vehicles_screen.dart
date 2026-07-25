@@ -181,7 +181,10 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                   hasScrollBody: false,
                   child: AppErrorView(
                     message: provider.errorMessage!,
-                    onRetry: provider.loadVehicles,
+                    onRetry: () => provider.loadVehicles(
+                      search: _searchQuery,
+                      sort: _selectedSort,
+                    ),
                   ),
                 )
               else if (provider.vehicles.isEmpty)
@@ -222,6 +225,8 @@ class _VehiclesScreenState extends State<VehiclesScreen> {
                                   child: vehicle.photoUrl != null
                                       ? CachedNetworkImage(
                                           imageUrl: vehicle.photoUrl!,
+                                          cacheKey:
+                                              '${vehicle.photoUrl}-${vehicle.updatedAt?.millisecondsSinceEpoch ?? ''}',
                                           fit: BoxFit.cover,
                                           placeholder: (context, url) =>
                                               const Center(

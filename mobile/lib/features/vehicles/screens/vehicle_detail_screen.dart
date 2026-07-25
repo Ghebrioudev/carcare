@@ -118,6 +118,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                         child: _vehicle!.photoUrl != null
                             ? CachedNetworkImage(
                                 imageUrl: _vehicle!.photoUrl!,
+                                cacheKey:
+                                    '${_vehicle!.photoUrl}-${_vehicle!.updatedAt?.millisecondsSinceEpoch ?? ''}',
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => const Center(
                                   child: CircularProgressIndicator(),
@@ -140,8 +142,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
             actions: [
               if (_vehicle != null)
                 IconButton(
-                  onPressed: () =>
-                      context.push('/vehicles/${widget.vehicleId}/edit'),
+                  onPressed: () async {
+                    await context.push('/vehicles/${widget.vehicleId}/edit');
+                    if (mounted) _loadVehicle();
+                  },
                   icon: const Icon(Icons.edit_outlined),
                 ),
             ],

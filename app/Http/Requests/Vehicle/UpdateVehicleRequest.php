@@ -13,6 +13,17 @@ class UpdateVehicleRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'remove_photo' => match (true) {
+                is_bool($this->remove_photo) => $this->remove_photo,
+                is_null($this->remove_photo) => null,
+                default => filter_var($this->remove_photo, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            },
+        ]);
+    }
+
     public function rules(): array
     {
         $vehicle = $this->route('vehicle');

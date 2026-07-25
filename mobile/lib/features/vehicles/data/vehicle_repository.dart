@@ -64,20 +64,14 @@ class VehicleRepository {
     if (photo != null || removePhoto != null) {
       formData = FormData.fromMap({
         ...payload,
-        '_method': 'PUT',
         if (photo != null) 'photo': await MultipartFile.fromFile(photo.path),
         if (removePhoto != null) 'remove_photo': removePhoto,
       });
     }
-    final data = formData != null
-        ? await _apiClient.post(
-            '/vehicles/$id',
-            data: formData,
-          )
-        : await _apiClient.put(
-            '/vehicles/$id',
-            data: payload,
-          );
+    final data = await _apiClient.put(
+      '/vehicles/$id',
+      data: formData ?? payload,
+    );
     final vehicleJson = data['data'] as Map<String, dynamic>? ?? data;
 
     return Vehicle.fromJson(vehicleJson);
