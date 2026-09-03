@@ -7,7 +7,9 @@ class AppConfig {
   /// - Physical device:  `http://YOUR_PC_IP:8000/api`
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.70:8000/api',
+    //defaultValue: 'http://192.168.1.70:8000/api',
+    defaultValue: 'https://snowboard-distinct-layers-ccd.trycloudflare.com/api', 
+
   );
 
   static const String appName = 'CarCare';
