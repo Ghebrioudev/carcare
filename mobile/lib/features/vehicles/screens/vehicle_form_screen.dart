@@ -10,6 +10,9 @@ import '../../../core/constants/fuel_types.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_states.dart';
+import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/glass_text_field.dart';
+import '../../../core/widgets/primary_button.dart';
 import '../data/vehicle_repository.dart';
 import '../providers/vehicle_provider.dart';
 
@@ -90,9 +93,9 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
-        imageQuality: 80,
-        maxWidth: 1200,
-        maxHeight: 1200,
+        imageQuality: 85,
+        maxWidth: 1400,
+        maxHeight: 1400,
       );
       if (pickedFile != null) {
         setState(() {
@@ -103,7 +106,7 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
+          SnackBar(content: Text('Failed to select image: $e')),
         );
       }
     }
@@ -172,136 +175,199 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.canvas,
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit vehicle' : 'Add vehicle'),
+        backgroundColor: AppTheme.canvas,
+        title: Text(widget.isEditing ? 'Edit Vehicle' : 'New Vehicle'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: _isFetching
           ? const AppLoadingOverlay(message: 'Loading vehicle...')
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 48),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildImagePicker(),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _brandController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Brand',
-                        prefixIcon: Icon(Icons.business_outlined),
-                      ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _modelController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Model',
-                        prefixIcon: Icon(Icons.directions_car_outlined),
-                      ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _yearController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        labelText: 'Year',
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        final year = int.tryParse(value);
-                        if (year == null) {
-                          return 'Invalid year';
-                        }
-                        final maxYear = DateTime.now().year + 1;
-                        if (year < 1900 || year > maxYear) {
-                          return 'Year must be between 1900 and $maxYear';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _plateController,
-                      textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(
-                        labelText: 'License plate',
-                        prefixIcon: Icon(Icons.pin_outlined),
-                      ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      controller: _mileageController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(
-                        labelText: 'Current mileage (km)',
-                        prefixIcon: Icon(Icons.speed_outlined),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Required';
-                        }
-                        if (int.tryParse(value) == null) {
-                          return 'Invalid mileage';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    DropdownButtonFormField<String>(
-                      initialValue: _fuelType,
-                      decoration: const InputDecoration(
-                        labelText: 'Fuel type',
-                        prefixIcon: Icon(Icons.local_gas_station_outlined),
-                      ),
-                      items: fuelTypeOptions
-                          .map(
-                            (option) => DropdownMenuItem(
-                              value: option.value,
-                              child: Text(option.label),
+                    const SizedBox(height: 20),
+
+                    // Primary Specs Glass Container
+                    GlassCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Vehicle Identity',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
                             ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _fuelType = value);
-                        }
-                      },
+                          ),
+                          const SizedBox(height: 16),
+                          GlassTextField(
+                            controller: _brandController,
+                            textCapitalization: TextCapitalization.words,
+                            labelText: 'Brand / Make',
+                            hintText: 'e.g. Porsche, Audi, BMW',
+                            prefixIcon: const Icon(Icons.business_rounded),
+                            validator: (value) =>
+                                value == null || value.trim().isEmpty ? 'Required' : null,
+                          ),
+                          const SizedBox(height: 14),
+                          GlassTextField(
+                            controller: _modelController,
+                            textCapitalization: TextCapitalization.words,
+                            labelText: 'Model',
+                            hintText: 'e.g. 911 Carrera, RS6, M3',
+                            prefixIcon: const Icon(Icons.directions_car_rounded),
+                            validator: (value) =>
+                                value == null || value.trim().isEmpty ? 'Required' : null,
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GlassTextField(
+                                  controller: _yearController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  labelText: 'Model Year',
+                                  hintText: '2024',
+                                  prefixIcon: const Icon(Icons.calendar_today_rounded),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final year = int.tryParse(value);
+                                    if (year == null) {
+                                      return 'Invalid';
+                                    }
+                                    final maxYear = DateTime.now().year + 1;
+                                    if (year < 1900 || year > maxYear) {
+                                      return '1900 - $maxYear';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: GlassTextField(
+                                  controller: _plateController,
+                                  textCapitalization: TextCapitalization.characters,
+                                  labelText: 'License Plate',
+                                  hintText: 'AB-123-CD',
+                                  prefixIcon: const Icon(Icons.pin_rounded),
+                                  validator: (value) =>
+                                      value == null || value.trim().isEmpty ? 'Required' : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+
+                    const SizedBox(height: 16),
+
+                    // Telemetry & Engineering Glass Container
+                    GlassCard(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Engineering & Telemetry',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          GlassTextField(
+                            controller: _mileageController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            labelText: 'Current Mileage (km)',
+                            hintText: '75000',
+                            prefixIcon: const Icon(Icons.speed_rounded),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'Invalid odometer';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          DropdownButtonFormField<String>(
+                            initialValue: _fuelType,
+                            dropdownColor: AppTheme.surface2,
+                            style: const TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: const InputDecoration(
+                              labelText: 'Fuel & Powertrain System',
+                              prefixIcon: Icon(Icons.local_gas_station_rounded),
+                            ),
+                            items: fuelTypeOptions
+                                .map(
+                                  (option) => DropdownMenuItem(
+                                    value: option.value,
+                                    child: Text(option.label),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _fuelType = value);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
                     if (_errorMessage != null) ...[
                       const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: AppTheme.danger),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.dangerGlow,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppTheme.danger.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: AppTheme.danger,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
+
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    PrimaryButton(
                       onPressed: _isLoading ? null : _submit,
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(widget.isEditing ? 'Save changes' : 'Create vehicle'),
+                      isLoading: _isLoading,
+                      label: widget.isEditing ? 'Save Vehicle Specs' : 'Add to Garage',
+                      icon: Icons.check_circle_outline_rounded,
                     ),
                   ],
                 ),
@@ -317,26 +383,19 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Vehicle photo',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-        const SizedBox(height: 12),
         Container(
-          height: 200,
+          height: 180,
           decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF101014),
+            borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: AppTheme.border,
-              width: 1,
+              color: AppTheme.borderHighlighted,
+              width: 1.0,
             ),
           ),
           child: hasImage
               ? ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(22),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -349,47 +408,72 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
                               '$_existingImageUrl-${_existingUpdatedAt?.millisecondsSinceEpoch ?? ''}',
                           fit: BoxFit.cover,
                           placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppTheme.primaryLight,
+                            ),
                           ),
                           errorWidget: (context, url, error) => const Icon(
-                            Icons.error_outline,
-                            size: 48,
+                            Icons.error_outline_rounded,
+                            size: 44,
                             color: AppTheme.textSecondary,
                           ),
                         ),
                       Positioned(
-                        top: 8,
-                        right: 8,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: Colors.white,
+                        top: 10,
+                        right: 10,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.black87,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            onPressed: _clearImage,
                           ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.black54,
-                          ),
-                          onPressed: _clearImage,
                         ),
                       ),
                     ],
                   ),
                 )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.add_photo_alternate_outlined,
-                      size: 56,
-                      color: AppTheme.textSecondary,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Add a photo of your vehicle',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
-                    ),
-                  ],
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: AppTheme.surface2,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.border, width: 1),
+                        ),
+                        child: const Icon(
+                          Icons.add_a_photo_outlined,
+                          size: 26,
+                          color: AppTheme.primaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Upload Vehicle Photo',
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'JPG or PNG from camera or gallery',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
         ),
         const SizedBox(height: 12),
@@ -398,16 +482,16 @@ class _VehicleFormScreenState extends State<VehicleFormScreen> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _pickImage(ImageSource.gallery),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: const Text('From gallery'),
+                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                label: const Text('Gallery'),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: () => _pickImage(ImageSource.camera),
-                icon: const Icon(Icons.camera_alt_outlined),
-                label: const Text('Take photo'),
+                icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                label: const Text('Camera'),
               ),
             ),
           ],

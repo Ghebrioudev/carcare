@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'primary_button.dart';
 
+/// Dark automotive loading overlay with animated emerald spinner.
 class AppLoadingOverlay extends StatelessWidget {
   const AppLoadingOverlay({super.key, this.message});
 
@@ -13,23 +15,37 @@ class AppLoadingOverlay extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(
-              strokeWidth: 3.5,
-              color: AppTheme.primary,
+          Container(
+            width: 56,
+            height: 56,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppTheme.surface1,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.border, width: 1.0),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black45,
+                  blurRadius: 16,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: AppTheme.primaryLight,
             ),
           ),
           if (message != null) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+                fontSize: 13.5,
+              ),
             ),
           ],
         ],
@@ -38,12 +54,13 @@ class AppLoadingOverlay extends StatelessWidget {
   }
 }
 
+/// Dark automotive error view with crimson accent and retry CTA.
 class AppErrorView extends StatelessWidget {
   const AppErrorView({
     super.key,
     required this.message,
     this.onRetry,
-    this.icon = Icons.error_outline,
+    this.icon = Icons.warning_amber_rounded,
   });
 
   final String message;
@@ -54,40 +71,51 @@ class AppErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 84,
-              height: 84,
+              width: 76,
+              height: 76,
               decoration: BoxDecoration(
-                color: AppTheme.danger.withValues(alpha: 0.1),
+                color: AppTheme.dangerGlow,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppTheme.danger.withValues(alpha: 0.3),
+                  width: 1.0,
+                ),
               ),
-              child: Icon(icon, color: AppTheme.danger, size: 42),
+              child: Icon(icon, color: AppTheme.danger, size: 38),
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Something went wrong',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+            const SizedBox(height: 20),
+            const Text(
+              'Diagnostic Alert',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textPrimary,
+                letterSpacing: -0.3,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13.5,
+                height: 1.4,
+              ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              const SizedBox(height: 28),
-              ElevatedButton.icon(
+              const SizedBox(height: 24),
+              PrimaryButton(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try again'),
+                label: 'Retry connection',
+                icon: Icons.refresh_rounded,
+                isFullWidth: false,
+                height: 46,
               ),
             ],
           ],
@@ -97,12 +125,13 @@ class AppErrorView extends StatelessWidget {
   }
 }
 
+/// Dark empty state with luxury automotive icon and clear action CTA.
 class AppEmptyView extends StatelessWidget {
   const AppEmptyView({
     super.key,
     required this.title,
     required this.subtitle,
-    this.icon = Icons.inbox_outlined,
+    this.icon = Icons.directions_car_outlined,
     this.action,
   });
 
@@ -115,41 +144,54 @@ class AppEmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: 84,
+              height: 84,
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.08),
+                color: AppTheme.surface1,
                 shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.border, width: 1.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 20,
+                    offset: Offset(0, 6),
+                  ),
+                ],
               ),
               child: Icon(
                 icon,
-                size: 46,
-                color: AppTheme.primary.withValues(alpha: 0.8),
+                size: 40,
+                color: AppTheme.primaryLight,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textPrimary,
+                letterSpacing: -0.3,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 13.5,
+                height: 1.45,
+              ),
               textAlign: TextAlign.center,
             ),
             if (action != null) ...[
-              const SizedBox(height: 32),
+              const SizedBox(height: 26),
               action!,
             ],
           ],
@@ -159,6 +201,7 @@ class AppEmptyView extends StatelessWidget {
   }
 }
 
+/// Dark sliding shader shimmer mask for skeleton loading.
 class SkeletonLoader extends StatefulWidget {
   const SkeletonLoader({super.key, required this.child, this.enabled = true});
 
@@ -178,7 +221,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
     _animation = Tween<double>(begin: -1, end: 2).animate(
@@ -196,22 +239,27 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
   Widget build(BuildContext context) {
     if (!widget.enabled) return widget.child;
 
-    return ShaderMask(
-      blendMode: BlendMode.srcATop,
-      shaderCallback: (bounds) {
-        return LinearGradient(
-          colors: [
-            AppTheme.border,
-            AppTheme.border.withValues(alpha: 0.4),
-            AppTheme.border,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-          begin: const Alignment(-1, 0),
-          end: const Alignment(1, 0),
-          transform: _SlidingGradientTransform(slidePercent: _animation.value),
-        ).createShader(bounds);
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              colors: const [
+                Color(0xFF141416),
+                Color(0xFF24242A),
+                Color(0xFF141416),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+              begin: const Alignment(-1, 0),
+              end: const Alignment(1, 0),
+              transform: _SlidingGradientTransform(slidePercent: _animation.value),
+            ).createShader(bounds);
+          },
+          child: widget.child,
+        );
       },
-      child: widget.child,
     );
   }
 }
@@ -228,9 +276,9 @@ class _SlidingGradientTransform extends GradientTransform {
 class SkeletonCard extends StatelessWidget {
   const SkeletonCard({
     super.key,
-    this.height = 120,
+    this.height = 110,
     this.width = double.infinity,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(18),
   });
 
   final double height;
@@ -244,24 +292,18 @@ class SkeletonCard extends StatelessWidget {
       height: height,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surface1,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTheme.border, width: 1),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SkeletonText(width: 140, height: 18, borderRadius: 8),
+          SkeletonText(width: 140, height: 16, borderRadius: 6),
+          SizedBox(height: 10),
+          SkeletonText(width: 210, height: 12, borderRadius: 5),
           SizedBox(height: 8),
-          SkeletonText(width: 200, height: 14, borderRadius: 6),
-          SizedBox(height: 8),
-          SkeletonText(width: 120, height: 14, borderRadius: 6),
+          SkeletonText(width: 100, height: 12, borderRadius: 5),
         ],
       ),
     );
@@ -278,9 +320,10 @@ class SkeletonCircle extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
-        color: AppTheme.border,
+      decoration: BoxDecoration(
+        color: AppTheme.surface2,
         shape: BoxShape.circle,
+        border: Border.all(color: AppTheme.border, width: 1),
       ),
     );
   }
@@ -291,7 +334,7 @@ class SkeletonText extends StatelessWidget {
     super.key,
     this.width = double.infinity,
     this.height = 16,
-    this.borderRadius = 8,
+    this.borderRadius = 6,
   });
 
   final double width;
@@ -304,7 +347,7 @@ class SkeletonText extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppTheme.border,
+        color: AppTheme.surface2,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
     );

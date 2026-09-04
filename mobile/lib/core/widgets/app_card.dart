@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+/// Premium dark automotive card with subtle hairline border and Liquid Glass lighting.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -10,8 +11,10 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(20),
     this.color,
     this.margin = EdgeInsets.zero,
-    this.borderRadius = 20,
+    this.borderRadius = 22,
     this.hasShadow = true,
+    this.borderColor,
+    this.gradient,
   });
 
   final Widget child;
@@ -21,24 +24,24 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final double borderRadius;
   final bool hasShadow;
+  final Color? borderColor;
+  final Gradient? gradient;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveBorderRadius = BorderRadius.circular(borderRadius);
+
     final card = Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: color ?? Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: hasShadow
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                  spreadRadius: 0,
-                ),
-              ]
-            : null,
+        color: color ?? (gradient == null ? AppTheme.surface1 : null),
+        gradient: color == null ? (gradient ?? AppTheme.darkCardGradient) : null,
+        borderRadius: effectiveBorderRadius,
+        border: Border.all(
+          color: borderColor ?? AppTheme.border,
+          width: 1.0,
+        ),
+        boxShadow: hasShadow ? AppTheme.subtleShadow : null,
       ),
       child: Padding(padding: padding, child: child),
     );
@@ -47,16 +50,19 @@ class AppCard extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(borderRadius),
+      borderRadius: effectiveBorderRadius,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: effectiveBorderRadius,
+        splashColor: AppTheme.primary.withValues(alpha: 0.12),
+        highlightColor: AppTheme.primary.withValues(alpha: 0.04),
         child: card,
       ),
     );
   }
 }
 
+/// Metric statistic card with dark automotive styling
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -78,37 +84,50 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: (iconBackgroundColor ?? iconColor).withValues(alpha: 0.1),
+              color: (iconBackgroundColor ?? iconColor).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: (iconBackgroundColor ?? iconColor).withValues(alpha: 0.25),
+                width: 1.0,
+              ),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -119,6 +138,7 @@ class StatCard extends StatelessWidget {
   }
 }
 
+/// Header for screen sections with title and optional text CTA button
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -134,27 +154,44 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 12),
+      padding: const EdgeInsets.fromLTRB(4, 16, 4, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.textPrimary,
+              letterSpacing: -0.3,
+            ),
           ),
           if (actionLabel != null && onAction != null)
-            TextButton(
-              onPressed: onAction,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-              ),
-              child: Text(
-                actionLabel!,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.primary,
+            InkWell(
+              onTap: onAction,
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      actionLabel!,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primaryLight,
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: AppTheme.primaryLight,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -164,12 +201,13 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
+/// Tinted circular container with icon
 class IconBadge extends StatelessWidget {
   const IconBadge({
     super.key,
     required this.icon,
     this.color = AppTheme.primary,
-    this.size = 52,
+    this.size = 50,
     this.backgroundColor,
   });
 
@@ -184,14 +222,19 @@ class IconBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: (backgroundColor ?? color).withValues(alpha: 0.1),
+        color: (backgroundColor ?? color).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(size * 0.35),
+        border: Border.all(
+          color: (backgroundColor ?? color).withValues(alpha: 0.22),
+          width: 1.0,
+        ),
       ),
-      child: Icon(icon, color: color, size: size * 0.48),
+      child: Icon(icon, color: color, size: size * 0.46),
     );
   }
 }
 
+/// Pill status chip with optional icon and custom semantic color
 class StatusChip extends StatelessWidget {
   const StatusChip({
     super.key,
@@ -209,27 +252,29 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isOutlined ? Colors.transparent : color.withValues(alpha: 0.1),
-        border: isOutlined
-            ? Border.all(color: color, width: 1.5)
-            : Border.all(color: Colors.transparent),
+        color: isOutlined ? Colors.transparent : color.withValues(alpha: 0.12),
+        border: Border.all(
+          color: isOutlined ? color : color.withValues(alpha: 0.25),
+          width: 1.0,
+        ),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, color: color, size: 16),
-            const SizedBox(width: 6),
+            Icon(icon, color: color, size: 13),
+            const SizedBox(width: 5),
           ],
           Text(
             label,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w700,
-              fontSize: 12,
+              fontSize: 11.5,
+              letterSpacing: -0.1,
             ),
           ),
         ],
@@ -238,6 +283,7 @@ class StatusChip extends StatelessWidget {
   }
 }
 
+/// Automotive reminder card with urgency bar and status details
 class ReminderCard extends StatelessWidget {
   const ReminderCard({
     super.key,
@@ -261,45 +307,55 @@ class ReminderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isOverdue ? AppTheme.danger : AppTheme.warning;
+
     return AppCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(3),
+          Container(
+            width: 4,
+            height: 44,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.5),
+                  blurRadius: 6,
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '$vehicleName · $reminderType',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
-                    ),
-                  ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
                 ),
-              ),
-              const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  '$vehicleName · $reminderType',
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppTheme.textMuted,
+            size: 20,
           ),
         ],
       ),

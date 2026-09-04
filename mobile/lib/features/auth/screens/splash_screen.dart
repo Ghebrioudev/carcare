@@ -22,18 +22,18 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
     _iconScaleAnimation =
-        Tween<double>(begin: 0.6, end: 1.0).animate(CurvedAnimation(
+        Tween<double>(begin: 0.7, end: 1.0).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOutCubic,
     ));
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.3, 1.0),
+        curve: const Interval(0.2, 1.0, curve: Curves.easeIn),
       ),
     );
     _controller.forward();
@@ -52,64 +52,113 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.surface,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ScaleTransition(
-              scale: _iconScaleAnimation,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppTheme.primary,
-                      AppTheme.secondary,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(36)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x4D6C5CE7),
-                      blurRadius: 24,
-                      offset: Offset(0, 12),
-                      spreadRadius: -4,
-                    ),
+      backgroundColor: AppTheme.canvas,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Ambient emerald halo
+          Center(
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.primary.withValues(alpha: 0.12),
+                    Colors.transparent,
                   ],
                 ),
-                child: const Icon(
-                  Icons.directions_car_rounded,
-                  color: Colors.white,
-                  size: 64,
-                ),
               ),
             ),
-            const SizedBox(height: 36),
-            FadeTransition(
-              opacity: _fadeAnimation,
-              child: Text(
-                AppConfig.appName,
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.textPrimary,
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ScaleTransition(
+                  scale: _iconScaleAnimation,
+                  child: Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF1F1F24),
+                          Color(0xFF101013),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: AppTheme.primary.withValues(alpha: 0.4),
+                        width: 1.5,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x3316A249),
+                          blurRadius: 30,
+                          offset: Offset(0, 10),
+                          spreadRadius: 2,
+                        ),
+                        BoxShadow(
+                          color: Colors.black,
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
                     ),
-              ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.directions_car_rounded,
+                        color: Colors.white,
+                        size: 52,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    children: [
+                      Text(
+                        AppConfig.appName.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 4.0,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'PREMIUM AUTOMOTIVE CARE',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textMuted,
+                          letterSpacing: 2.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 52),
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(AppTheme.primaryLight),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 48),
-            const SizedBox(
-              width: 40,
-              height: 40,
-              child: CircularProgressIndicator(
-                strokeWidth: 3.5,
-                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

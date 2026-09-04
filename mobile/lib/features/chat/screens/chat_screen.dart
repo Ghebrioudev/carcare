@@ -18,10 +18,10 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   static const List<String> _suggestions = [
     'When is my next maintenance?',
-    'What maintenance is overdue?',
+    'What service items are overdue?',
     'How much have I spent on my vehicles?',
     'Why are my brakes squeaking?',
-    'Show my maintenance history.',
+    'Show my service history summary.',
   ];
 
   late final ScrollController _scrollController;
@@ -67,11 +67,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ChatProvider>();
 
-    // Auto-scroll whenever messages or loading state changes.
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
+      backgroundColor: AppTheme.canvas,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildHeader(context, provider),
@@ -105,36 +106,34 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildHeader(BuildContext context, ChatProvider provider) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 6, 8, 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: const Border(
+      padding: const EdgeInsets.fromLTRB(12, 10, 16, 12),
+      decoration: const BoxDecoration(
+        color: AppTheme.canvas,
+        border: Border(
           bottom: BorderSide(color: AppTheme.border, width: 1),
         ),
       ),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () {
-              final nav = Navigator.of(context);
-              if (nav.canPop()) {
-                nav.pop();
-              }
-            },
-            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-          ),
-          const SizedBox(width: 4),
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppTheme.primary.withValues(alpha: 0.08),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF222228), Color(0xFF101014)],
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppTheme.primaryLight.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
             child: const Icon(
-              Icons.smart_toy_outlined,
-              color: AppTheme.primary,
-              size: 26,
+              Icons.auto_awesome_rounded,
+              color: AppTheme.primaryLight,
+              size: 20,
             ),
           ),
           const SizedBox(width: 12),
@@ -142,29 +141,35 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'AI Assistant',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: 7,
+                      height: 7,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF22C55E),
+                        color: AppTheme.primaryLight,
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      provider.isLoading ? 'Thinking…' : 'Online • Answers with your data',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                      provider.isLoading
+                          ? 'Analyzing telemetry...'
+                          : 'Online • Synced with your garage',
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 11.5,
+                      ),
                     ),
                   ],
                 ),
@@ -176,8 +181,9 @@ class _ChatScreenState extends State<ChatScreen> {
               tooltip: 'Clear conversation',
               onPressed: provider.clear,
               icon: const Icon(
-                Icons.delete_outline,
-                color: AppTheme.textSecondary,
+                Icons.delete_outline_rounded,
+                color: AppTheme.textMuted,
+                size: 20,
               ),
             ),
         ],
@@ -190,7 +196,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.only(top: 12, bottom: 20),
       itemCount: messages.length + (provider.isLoading ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == messages.length) {
@@ -203,13 +209,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildInputBar(BuildContext context, ChatProvider provider) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
     return Container(
-      padding: EdgeInsets.fromLTRB(12, 10, 12, 10 + safeBottom),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: const Border(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 92),
+      decoration: const BoxDecoration(
+        color: AppTheme.canvas,
+        border: Border(
           top: BorderSide(color: AppTheme.border, width: 1),
         ),
       ),
@@ -218,55 +222,54 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: Container(
-              constraints: const BoxConstraints(minHeight: 48, maxHeight: 160),
+              constraints: const BoxConstraints(minHeight: 48, maxHeight: 150),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surface1,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppTheme.border, width: 1),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
+                    color: Colors.black45,
                     blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      focusNode: _focusNode,
-                      maxLines: null,
-                      textInputAction: TextInputAction.newline,
-                      keyboardType: TextInputType.multiline,
-                      enabled: !provider.isLoading,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        hintText: 'Ask anything about your car…',
-                        hintStyle:
-                            Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppTheme.textSecondary,
-                                ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 12),
-                        border: InputBorder.none,
-                        isDense: true,
-                      ),
-                      onSubmitted: (value) {
-                        if (value.trim().isNotEmpty && !provider.isLoading) {
-                          _send(value);
-                        }
-                      },
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller: _textController,
+                  focusNode: _focusNode,
+                  maxLines: null,
+                  textInputAction: TextInputAction.newline,
+                  keyboardType: TextInputType.multiline,
+                  enabled: !provider.isLoading,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 14.5,
                   ),
-                ],
+                  decoration: const InputDecoration(
+                    hintText: 'Ask anything about your vehicle...',
+                    hintStyle: TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 14,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 13),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                  ),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty && !provider.isLoading) {
+                      _send(value);
+                    }
+                  },
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildSendButton(context, provider),
         ],
       ),
@@ -277,38 +280,38 @@ class _ChatScreenState extends State<ChatScreen> {
     return ListenableBuilder(
       listenable: _textController,
       builder: (context, _) {
-        final isActive = !provider.isLoading && _textController.text.trim().isNotEmpty;
+        final isActive =
+            !provider.isLoading && _textController.text.trim().isNotEmpty;
         return GestureDetector(
           onTap: isActive ? () => _send(_textController.text) : null,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
-            width: 48,
-            height: 48,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
-              color: isActive ? AppTheme.primary : AppTheme.border,
+              gradient: isActive ? AppTheme.primaryGradient : null,
+              color: isActive ? null : AppTheme.surface2,
               shape: BoxShape.circle,
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: AppTheme.primary.withValues(alpha: 0.25),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+              border: Border.all(
+                color: isActive
+                    ? AppTheme.primaryLight.withValues(alpha: 0.5)
+                    : AppTheme.border,
+                width: 1,
+              ),
+              boxShadow: isActive ? AppTheme.primaryGlowShadow : null,
             ),
             child: provider.isLoading
                 ? const Padding(
-                    padding: EdgeInsets.all(13),
+                    padding: EdgeInsets.all(12),
                     child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
+                      strokeWidth: 2.2,
                       valueColor: AlwaysStoppedAnimation(Colors.white),
                     ),
                   )
                 : Icon(
-                    Icons.send_rounded,
-                    color: isActive ? Colors.white : AppTheme.textSecondary,
+                    Icons.arrow_upward_rounded,
+                    color: isActive ? Colors.white : AppTheme.textMuted,
                     size: 22,
                   ),
           ),

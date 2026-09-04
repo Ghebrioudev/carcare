@@ -19,8 +19,6 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alignment = _isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = _isUser ? AppTheme.primary : Colors.white;
-    final textColor = _isUser ? Colors.white : AppTheme.textPrimary;
     final borderRadius = BorderRadius.only(
       topLeft: const Radius.circular(20),
       topRight: const Radius.circular(20),
@@ -28,37 +26,46 @@ class ChatBubble extends StatelessWidget {
       bottomRight: _isUser ? const Radius.circular(6) : const Radius.circular(20),
     );
 
-    final shadowColor = Colors.black.withValues(alpha: 0.05);
-
     return Align(
       alignment: alignment,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.78,
+          maxWidth: MediaQuery.of(context).size.width * 0.80,
         ),
         child: Column(
           crossAxisAlignment:
               _isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                color: bubbleColor,
+                gradient: _isUser ? AppTheme.primaryGradient : null,
+                color: _isUser ? null : AppTheme.surface1,
                 borderRadius: borderRadius,
-                boxShadow: [
-                  BoxShadow(
-                    color: shadowColor,
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                border: Border.all(
+                  color: _isUser
+                      ? AppTheme.primaryLight.withValues(alpha: 0.4)
+                      : AppTheme.border,
+                  width: 1.0,
+                ),
+                boxShadow: _isUser
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.25),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : AppTheme.subtleShadow,
               ),
               child: DefaultTextStyle(
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      color: textColor,
-                      height: 1.35,
-                    ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w400,
+                ),
                 child: SelectableText(
                   message.content,
                   textWidthBasis: TextWidthBasis.parent,
@@ -70,10 +77,11 @@ class ChatBubble extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: _isUser ? 4 : 8),
               child: Text(
                 _timeFormat.format(message.timestamp),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                      fontSize: 11,
-                    ),
+                style: const TextStyle(
+                  color: AppTheme.textMuted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],

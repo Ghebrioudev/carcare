@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_theme.dart';
+import 'floating_navigation_bar.dart';
 
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
@@ -18,37 +19,36 @@ class MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: navigationShell,
-      ),
-      bottomNavigationBar: NavigationBar(
+      backgroundColor: AppTheme.canvas,
+      extendBody: true,
+      body: navigationShell,
+      bottomNavigationBar: FloatingNavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTap,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+        items: const [
+          FloatingNavItem(
+            icon: Icons.speed_outlined,
+            activeIcon: Icons.speed_rounded,
+            label: 'Home',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.directions_car_outlined),
-            selectedIcon: Icon(Icons.directions_car),
+          FloatingNavItem(
+            icon: Icons.directions_car_outlined,
+            activeIcon: Icons.directions_car_rounded,
             label: 'Vehicles',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.smart_toy_outlined),
-            selectedIcon: Icon(Icons.smart_toy),
-            label: 'AI Assistant',
+          FloatingNavItem(
+            icon: Icons.auto_awesome_outlined,
+            activeIcon: Icons.auto_awesome_rounded,
+            label: 'AI Chat',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
+          FloatingNavItem(
+            icon: Icons.notifications_none_rounded,
+            activeIcon: Icons.notifications_active_rounded,
             label: 'Reminders',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+          FloatingNavItem(
+            icon: Icons.person_outline_rounded,
+            activeIcon: Icons.person_rounded,
             label: 'Profile',
           ),
         ],
@@ -57,6 +57,7 @@ class MainShell extends StatelessWidget {
   }
 }
 
+/// Luxury automotive screen header with title, subtitle, and optional action widget
 class ScreenHeader extends StatelessWidget {
   const ScreenHeader({
     super.key,
@@ -72,7 +73,7 @@ class ScreenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -82,18 +83,23 @@ class ScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.textPrimary,
-                      ),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     subtitle!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w400,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ],

@@ -33,23 +33,18 @@ class _TypingIndicatorState extends State<TypingIndicator>
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface1,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
             bottomLeft: Radius.circular(6),
             bottomRight: Radius.circular(20),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppTheme.border, width: 1),
+          boxShadow: AppTheme.subtleShadow,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -72,13 +67,22 @@ class _TypingIndicatorState extends State<TypingIndicator>
                   offset: Offset(0, -6 * anim.value),
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: 8,
-                    height: 8,
+                    width: 7,
+                    height: 7,
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(
+                      color: AppTheme.primaryLight.withValues(
                         alpha: 0.35 + anim.value * 0.65,
                       ),
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(
+                            alpha: 0.4 * anim.value,
+                          ),
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                   ),
                 );
